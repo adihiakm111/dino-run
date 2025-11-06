@@ -147,13 +147,13 @@ function initGame() {
 
   ground = { y: canvas.height - 100, height: 100 };
 
-  // ✅ FIRST CACTUS ALWAYS FAR (600–900)
+  // ✅ FIRST CACTUS FIX 500px
   cactus = {
-    x: canvas.width + 600 + Math.random() * 300,
+    x: canvas.width + 500,
     y: ground.y - 45,
     width: 45,
     height: 45,
-    speed: 7
+    speed: 8
   };
 
   score = 0;
@@ -174,12 +174,9 @@ function jump() {
 function update() {
   if (gameOver) return;
 
-  cactus.speed = 8 + Math.floor(score / 5) * 5;
-
-  if (score >= 50) {
-    document.body.classList.add("night");
-    canvas.classList.add("night");
-  }
+  // ✅ SPEED FORMULA (0–4=8, 5–9=10, 10–14=13, 15–19=15...)
+  let block = Math.floor(score / 5);  
+  cactus.speed = 8 + (block * 2) + Math.floor(block / 2);
 
   dino.vy += dino.gravity;
   dino.y += dino.vy;
@@ -192,17 +189,13 @@ function update() {
 
   cactus.x -= cactus.speed;
 
-  // ✅ PERFECT SPAWN: medium (500–700) OR far (700–1000)
+  // ✅ FIXED DISTANCE AFTER FIRST: 300px
   if (cactus.x + cactus.width < 0) {
-
-    const medium = 500 + Math.random() * 200; // 500–700
-    const far = 700 + Math.random() * 300;    // 700–1000
-
-    cactus.x = canvas.width + (Math.random() < 0.5 ? medium : far);
-
+    cactus.x = canvas.width + 300;
     score++;
   }
 
+  // ✅ COLLISION BOXES
   const dinoBox = {
     l: dino.x + 10, r: dino.x + dino.width - 10,
     t: dino.y + 5, b: dino.y + dino.height - 5
