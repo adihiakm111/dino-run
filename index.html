@@ -75,13 +75,6 @@
       text-shadow: 2px 2px 5px black;
       display: none;
     }
-    #top3 {
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #222;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -109,8 +102,7 @@
     const restartBtn = document.getElementById("restartBtn");
     const menu = document.getElementById("menu");
     const restartMenu = document.getElementById("restartMenu");
-    const finalScore = document.getElementById("finalScore");
-    const top3Div = document.getElementById("top3");
+    const finalScore = document.getElementById("finalScore") ;
     const hardModeText = document.getElementById("hardModeText");
 
     // Responsive canvas
@@ -169,7 +161,6 @@
       canvas.style.display = "block";
       menu.style.display = "none";
       restartMenu.style.display = "none";
-      updateTop3Display();
     }
 
     function jump() {
@@ -191,7 +182,7 @@
       if (!gameStarted || gameOver) return;
 
       // Speed formula
-      cactus.speed = 7 + Math.floor(score / 5) * 4;
+      cactus.speed = 8 + Math.floor(score / 5) * 5;
 
       if (score >= 10) {
         dino.gravity = 1.6;
@@ -251,7 +242,6 @@
       finalScore.textContent = "Your Score: " + score;
       topScore = Math.max(score, topScore);
       localStorage.setItem("topScore", topScore);
-      updateTop3Display();
     }
 
     startBtn.addEventListener("click", () => { initGame(); gameLoop(); });
@@ -259,9 +249,8 @@
     window.addEventListener("keydown", e => { if (e.code === "Space") jump(); });
     window.addEventListener("mousedown", e => { if (e.button === 0) jump(); }); // ✅ Left click jump
     canvas.addEventListener("touchstart", jump);
-
-    updateTop3Display();
   </script>
 </body>
 </html>
+
 
