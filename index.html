@@ -60,25 +60,13 @@
 
     #restartMenu { display: none; }
 
-    #hardModeText {
-      position: absolute;
-      top: 15%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 2.2em;
-      color: #ff1744;
-      font-weight: bold;
-      text-shadow: 2px 2px 6px black;
-      display: none;
-    }
-
     #top3 {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
       padding: 6px 14px;
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.7);
       font-size: 1.2em;
       border-radius: 10px;
       font-weight: bold;
@@ -98,8 +86,6 @@
 
   <canvas id="gameCanvas"></canvas>
 
-  <div id="hardModeText">⚡ Hard Mode Activated!</div>
-
   <div id="restartMenu">
     <h2>Game Over</h2>
     <p id="finalScore"></p>
@@ -115,7 +101,6 @@ const restartBtn = document.getElementById("restartBtn");
 const menu = document.getElementById("menu");
 const restartMenu = document.getElementById("restartMenu");
 const finalScore = document.getElementById("finalScore");
-const hardModeText = document.getElementById("hardModeText");
 const top3Div = document.getElementById("top3");
 
 function setupCanvas() {
@@ -130,8 +115,11 @@ dinoImg.src = "dino.png";
 const cactusImg = new Image();
 cactusImg.src = "cactus.png";
 
-// ✅ EXACT SAME FILE NAME AS YOUR GITHUB
-const gameOverSound = new Audio("Aby Yar _1762315851464.mp3");
+// ✅ Both sound files — EXACT SAME NAME as your GitHub
+const sounds = [
+  new Audio("Aby Yar _1762315851464.mp3"),
+  new Audio("No SMS Sound_1762407927349.mp3")
+];
 
 let dino, ground, cactus, score, gameOver;
 let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
@@ -148,7 +136,6 @@ updateTopScores(0);
 function initGame() {
   document.body.classList.remove("night");
   canvas.classList.remove("night");
-  hardModeText.style.display = "none";
 
   dino = {
     x: 50, y: 0,
@@ -202,15 +189,25 @@ function update() {
     score++;
   }
 
-  const dinoBox = { l: dino.x + 10, r: dino.x + dino.width - 10, t: dino.y + 5, b: dino.y + dino.height - 5 };
-  const cactusBox = { l: cactus.x + 5, r: cactus.x + cactus.width - 5, t: cactus.y + 5, b: cactus.y + cactus.height - 5 };
+  const dinoBox = {
+    l: dino.x + 10, r: dino.x + dino.width - 10,
+    t: dino.y + 5, b: dino.y + dino.height - 5
+  };
 
-  if (dinoBox.l < cactusBox.r && dinoBox.r > cactusBox.l && dinoBox.t < cactusBox.b && dinoBox.b > cactusBox.t) {
+  const cactusBox = {
+    l: cactus.x + 5, r: cactus.x + cactus.width - 5,
+    t: cactus.y + 5, b: cactus.y + cactus.height - 5
+  };
+
+  if (dinoBox.l < cactusBox.r && dinoBox.r > cactusBox.l &&
+      dinoBox.t < cactusBox.b && dinoBox.b > cactusBox.t) {
 
     gameOver = true;
 
-    gameOverSound.currentTime = 0;
-    gameOverSound.play();
+    // ✅ Random sound
+    let s = sounds[Math.floor(Math.random() * sounds.length)];
+    s.currentTime = 0;
+    s.play();
 
     updateTopScores(score);
     setTimeout(showRestart, 400);
@@ -248,10 +245,9 @@ restartBtn.onclick = () => { initGame(); loop(); };
 
 window.addEventListener("keydown", e => { if (e.code === "Space") jump(); });
 
-// ✅ Kahin bhi dabane se jump
 document.body.addEventListener("mousedown", jump);
 document.body.addEventListener("touchstart", jump);
 
 </script>
 </body>
-</html>
+  </html>
