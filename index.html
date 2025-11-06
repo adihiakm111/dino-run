@@ -130,7 +130,8 @@ dinoImg.src = "dino.png";
 const cactusImg = new Image();
 cactusImg.src = "cactus.png";
 
-const gameOverSound = new Audio("Aby Yar_1762315851464.mp3");
+// ✅ EXACT SAME FILE NAME AS YOUR GITHUB
+const gameOverSound = new Audio("Aby Yar _1762315851464.mp3");
 
 let dino, ground, cactus, score, gameOver;
 let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
@@ -205,7 +206,7 @@ function update() {
   const cactusBox = { l: cactus.x + 5, r: cactus.x + cactus.width - 5, t: cactus.y + 5, b: cactus.y + cactus.height - 5 };
 
   if (dinoBox.l < cactusBox.r && dinoBox.r > cactusBox.l && dinoBox.t < cactusBox.b && dinoBox.b > cactusBox.t) {
-    
+
     gameOver = true;
 
     gameOverSound.currentTime = 0;
@@ -247,6 +248,7 @@ restartBtn.onclick = () => { initGame(); loop(); };
 
 window.addEventListener("keydown", e => { if (e.code === "Space") jump(); });
 
+// ✅ Kahin bhi dabane se jump
 document.body.addEventListener("mousedown", jump);
 document.body.addEventListener("touchstart", jump);
 
