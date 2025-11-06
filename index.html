@@ -73,9 +73,33 @@
       backdrop-filter: blur(3px);
       z-index: 100;
     }
+
+    /* ✅ AKM BUTTON STYLE */
+    #akmBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 8px 18px;
+      background: #ff5722;
+      color: white;
+      font-size: 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 2px solid #fff;
+      z-index: 200;
+    }
+
+    #akmBtn:hover {
+      background: #e64a19;
+    }
+
   </style>
 </head>
 <body>
+
+  <!-- ✅ AKM NAVIGATION BUTTON -->
+  <a href="akm.html" id="akmBtn">AKM</a>
 
   <div id="top3">Top 3 Scores: -</div>
 
@@ -147,7 +171,6 @@ function initGame() {
 
   ground = { y: canvas.height - 100, height: 100 };
 
-  // ✅ FIRST CACTUS FIX 500px
   cactus = {
     x: canvas.width + 500,
     y: ground.y - 45,
@@ -174,7 +197,6 @@ function jump() {
 function update() {
   if (gameOver) return;
 
-  // ✅ SPEED FORMULA (0–4=8, 5–9=10, 10–14=13, 15–19=15...)
   let block = Math.floor(score / 5);  
   cactus.speed = 8 + (block * 2) + Math.floor(block / 2);
 
@@ -189,22 +211,13 @@ function update() {
 
   cactus.x -= cactus.speed;
 
-  // ✅ FIXED DISTANCE AFTER FIRST: 300px
   if (cactus.x + cactus.width < 0) {
     cactus.x = canvas.width + 300;
     score++;
   }
 
-  // ✅ COLLISION BOXES
-  const dinoBox = {
-    l: dino.x + 10, r: dino.x + dino.width - 10,
-    t: dino.y + 5, b: dino.y + dino.height - 5
-  };
-
-  const cactusBox = {
-    l: cactus.x + 5, r: cactus.x + cactus.width - 5,
-    t: cactus.y + 5, b: cactus.y + cactus.height - 5
-  };
+  const dinoBox = { l: dino.x+10, r: dino.x+dino.width-10, t: dino.y+5, b: dino.y+dino.height-5 };
+  const cactusBox = { l: cactus.x+5, r: cactus.x+cactus.width-5, t: cactus.y+5, b: cactus.y+cactus.height-5 };
 
   if (dinoBox.l < cactusBox.r &&
       dinoBox.r > cactusBox.l &&
@@ -252,7 +265,6 @@ startBtn.onclick = () => { initGame(); loop(); };
 restartBtn.onclick = () => { initGame(); loop(); };
 
 window.addEventListener("keydown", e => { if (e.code === "Space") jump(); });
-
 document.body.addEventListener("mousedown", jump);
 document.body.addEventListener("touchstart", jump);
 
