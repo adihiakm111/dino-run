@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Run 🦖</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(to top, #c8e6c9 40%, #bbdefb 60%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      transition: background 1s;
+    }
+
+    canvas {
+      display: none;
+      background: linear-gradient(to top, #a5d6a7 40%, #b3e5fc 60%);
+      border: 4px solid #222;
+      border-radius: 12px;
+      image-rendering: pixelated;
+    }
+
+    #menu, #restartMenu {
+      text-align: center;
+    }
+
+    #speedMenu {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    #speedMenu input {
+      width: 120px;
+      padding: 8px;
+      font-size: 18px;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.7em;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 28px;
+      margin: 10px;
+      font-size: 1.3em;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #restartMenu { display: none; }
+
+    #top3 {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.65);
+      font-size: 1.2em;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="top3">Top 3 Scores: -</div>
+
+  <div id="menu">
+
+    <h1>Dino Run 🦖</h1>
+
+    <!-- ✅ USER SPEED INPUTS -->
+    <div id="speedMenu">
+      <label>Base Speed:</label><br>
+      <input id="baseSpeedInput" type="number" placeholder="8">
+
+      <br><br>
+
+      <label>Increase Every 5 Score:</label><br>
+      <input id="boostInput" type="number" placeholder="2">
+    </div>
+
+    <button id="startBtn">Start Game</button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="restartMenu">
+    <h2>Game Over</h2>
+    <p id="finalScore"></p>
+    <button id="restartBtn">Restart</button>
+  </div>
+
+<script>
+
+// ELEMENTS
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const startBtn = document.getElementById("startBtn");
+const restartBtn = document.getElementById("restartBtn");
+const menu = document.getElementById("menu");
+const restartMenu = document.getElementById("restartMenu");
+const finalScore = document.getElementById("finalScore");
+const top3Div = document.getElementById("top3");
+
+// CANVAS SIZE
+canvas.width = window.innerWidth * 0.90;
+canvas.height = window.innerHeight * 0.70;
+
+// IMAGES
+const dinoImg = new Image();
+dinoImg.src = "dino.png";
+
+const cactusImg = new Image();
+cactusImg.src = "cactus.png";
+
+// SOUNDS
+const sounds = [
+  new Audio("Aby Yar _1762315851464.mp3"),
+  new Audio("No SMS Sound_1762407927349.mp3")
+];
+
+// GAME VARIABLES
+let dino, ground, cactus, score, gameOver;
+let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
+
+let baseSpeed = 8;
+let boostPerBlock = 2;
+
+// SCORE SYSTEM
+function updateTopScores(s) {
+  topScores.push(s);
+  topScores.sort((a, b) => b - a);
+  topScores = topScores.slice(0, 3);
+  localStorage.setItem("topScores", JSON.stringify(topScores));
+  top3Div.textContent = "Top 3 Scores: " + topScores.join(", ");
+}
+updateTopScores(0);
+
+// INIT GAME
+function initGame() {
+
+  // ✅ USER VALUES or PLACEHOLDER
+  let baseVal = document.getElementById("baseSpeedInput").value;
+  let boostVal = document.getElementById("boostInput").value;
+
+  baseSpeed = baseVal ? parseInt(baseVal) : 8;
+  boostPerBlock = boostVal ? parseInt(boostVal) : 2;
+
+  dino = {
+    x: 50, y: 0,
+    width: 60, height: 60,
+    vy: 0, gravity: 1.3,
+    jumpPower: -20,
+    grounded: false
+  };
+
+  ground = { y: canvas.height - 100, height: 100 };
+
+  cactus = {
+    x: canvas.width + 500,
+    y: ground.y - 45,
+    width: 45,
+    height: 45,
+    speed: baseSpeed
+  };
+
+  score = 0;
+  gameOver = false;
+
+  menu.style.display = "none";
+  restartMenu.style.display = "none";
+  canvas.style.display = "block";
+}
+
+// JUMP
+function jump() {
+  if (dino.grounded) {
+    dino.vy = dino.jumpPower;
+    dino.grounded = false;
+  }
+}
+
+// UPDATE LOOP
+function update() {
+  if (gameOver) return;
+
+  // ✅ SPEED FORMULA — user controlled
+  let block = Math.floor(score / 5);
+  cactus.speed = baseSpeed + (block * boostPerBlock);
+
+  dino.vy += dino.gravity;
+  dino.y += dino.vy;
+
+  if (dino.y + dino.height >= ground.y) {
+    dino.y = ground.y - dino.height;
+    dino.vy = 0;
+    dino.grounded = true;
+  }
+
+  cactus.x -= cactus.speed;
+
+  // NEXT CACTUS DISTANCE
+  if (cactus.x + cactus.width < 0) {
+    cactus.x = canvas.width + 300;
+    score++;
+  }
+
+  // COLLISION BOXES
+  const dinoBox = { l: dino.x+10, r: dino.x+dino.width-10, t: dino.y+5, b: dino.y+dino.height-5 };
+  const cactusBox = { l: cactus.x+5, r: cactus.x+cactus.width-5, t: cactus.y+5, b: cactus.y+cactus.height-5 };
+
+  if (dinoBox.l < cactusBox.r &&
+      dinoBox.r > cactusBox.l &&
+      dinoBox.t < cactusBox.b &&
+      dinoBox.b > cactusBox.t) {
+
+    gameOver = true;
+
+    let s = sounds[Math.floor(Math.random() * sounds.length)];
+    s.currentTime = 0;
+    s.play();
+
+    updateTopScores(score);
+    setTimeout(showRestart, 400);
+  }
+}
+
+// DRAW LOOP
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#6d4c41";
+  ctx.fillRect(0, ground.y, canvas.width, ground.height);
+
+  ctx.drawImage(cactusImg, cactus.x, cactus.y, cactus.width, cactus.height);
+  ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+
+  ctx.fillStyle = "#111";
+  ctx.font = "24px Arial";
+  ctx.fillText("Score: " + score, 20, 35);
+}
+
+// MAIN LOOP
+function loop() {
+  update();
+  draw();
+  if (!gameOver) requestAnimationFrame(loop);
+}
+
+// SHOW RESTART
+function showRestart() {
+  canvas.style.display = "none";
+  restartMenu.style.display = "block";
+  finalScore.textContent = "Your Score: " + score;
+}
+
+startBtn.onclick = () => {
+  initGame();
+  loop();
+};
+
+restartBtn.onclick = () => location.reload();
+
+document.body.addEventListener("mousedown", jump);
+document.body.addEventListener("touchstart", jump);
+
+</script>
+</body>
+</html>
